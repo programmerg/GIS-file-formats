@@ -1,0 +1,194 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>demo</title>
+    
+    <link rel="stylesheet" href="libs/ol.css" type="text/css">
+    <link rel="stylesheet" href="libs/ol-layerswitcher.css" type="text/css">
+
+  </head>
+  <body>
+    
+    <div id="map" class="map" style="position: absolute;top: 0;left: 0;right: 0;bottom: 0;"></div>
+
+    <script src="libs/ol.js"></script>
+    <script src="libs/ol-layerswitcher.js"></script>
+    <script src="libs/geotiff.js"></script>
+    <script src="libs/shapefile.js"></script>
+    <script>
+
+    // ImageStatic loader function with GeoTIFF file support
+    // https://github.com/geotiffjs/geotiff.js
+    let GeoTIFFloader = function (img, src) {
+      const self = this;
+      const canvas = document.createElement('canvas');
+      GeoTIFF.fromUrl(src)
+        .then(tiff => tiff.getImage()
+          .then(image => {
+            const width = image.getWidth();
+            const height = image.getHeight();
+            const bbox = image.getBoundingBox(); // TFW files not supported!
+            
+            canvas.width = width;
+            canvas.height = height;
+            self.extent = bbox;
+            image.readRGB().then(raster => {
+
+              // render raw image data (rgb) to canvas
+              let ctx = canvas.getContext("2d");
+              let imageData = ctx.createImageData(width, height);
+              let o = 0;
+              for (let i = 0; i < raster.length; i += 3) {
+                imageData.data[o] = raster[i];
+                imageData.data[o + 1] = raster[i + 1];
+                imageData.data[o + 2] = raster[i + 2];
+                imageData.data[o + 3] = 255;
+                o += 4;
+              }
+              ctx.putImageData(imageData, 0, 0);
+
+              img.getImage().src = canvas.toDataURL();
+            })
+          }))
+        .catch(error => console.error(error));
+    };
+
+    // Vector loader function with ESRI Shape file support
+    // https://github.com/mbostock/shapefile
+    let SHPloader = function (extent, resolution, projection) {
+      const self = this;
+      shapefile.open(self.getUrl())
+        .then(source => source.read()
+          .then(function load(result) {
+            if (result.done) return;
+            self.addFeatures(
+              self.getFormat().readFeatures(result.value)
+            );
+            return source.read().then(load);
+          }))
+        .catch(error => self.removeLoadedExtent(extent))
+    };
+
+    // client side styling
+    let vectorStyle = (feature, resolution) => {
+      return new ol.style.Style({
+        fill: new ol.style.Fill({
+          color: [55, 126, 184, 0.24]
+        }),
+        stroke: new ol.style.Stroke({
+          color: [49, 132, 195],
+          width: 1
+        })
+      });
+    };
+
+    // define the map
+    let map = new ol.Map({
+      target: 'map',
+      controls: [
+        new ol.control.Zoom(),
+        new ol.control.Rotate(),
+        new ol.control.Attribution(),
+        new ol.control.LayerSwitcher({ groupSelectStyle: 'group' })
+      ],
+      view: new ol.View({
+        projection: 'EPSG:3857',
+        center: [2117211.2877144828, 6009019.550011185],
+        zoom: 9
+      }),
+      layers: [
+
+        // Base layer
+        new ol.layer.Tile({
+          title: 'OpenStreetMap',
+          source: new ol.source.OSM(),
+          visible: false
+        }),
+
+        
+        // GeoJPEG file
+        new ol.layer.Image({
+          title: 'GeoJPEG',
+          source: new ol.source.ImageStatic({
+            imageExtent: [2106732.7099006748758256, 5999340.3300000000745058, 2152354.5100993253290653, 6042735.8600000003352761],
+            // Georeference not supported
+            url: 'data/admin9.jpg'
+          }),
+          visible: false
+        }),
+
+        // GeoTIFF file
+        new ol.layer.Image({
+          title: 'GeoTIFF',
+          source: new ol.source.ImageStatic({
+            imageLoadFunction: GeoTIFFloader,
+            imageExtent: ol.proj.get('EPSG:3857').getExtent(),
+            url: 'data/admin9.tiff'
+          }),
+          visible: false
+        }),
+
+        // ESRI Shape file
+        new ol.layer.Vector({
+          title: 'ESRI Shape file',
+          source: new ol.source.Vector({
+            format: new ol.format.GeoJSON(),
+            loader: SHPloader,
+            url: 'data/admin9.shp'
+          }),
+          style: vectorStyle,
+          visible: false
+        }),
+
+        // MVT file
+        new ol.layer.Vector({
+          title: 'MVT',
+          source: new ol.source.Vector({
+            format: new ol.format.MVT(),
+            url: 'data/admin9.mvt'
+          }),
+          style: vectorStyle,
+          visible: false
+        }),
+
+        // GeoJSON file
+        new ol.layer.Vector({
+          title: 'GeoJSON',
+          source: new ol.source.Vector({
+            format: new ol.format.GeoJSON(),
+            url: 'data/admin9.geojson'
+          }),
+          style: vectorStyle,
+          visible: false
+        }),
+
+        // KML file
+        new ol.layer.Vector({
+          title: 'KML',
+          source: new ol.source.Vector({
+            format: new ol.format.KML(),
+            url: 'data/admin9.kml'
+          }),
+          style: vectorStyle,
+          visible: false
+        }),
+
+        // WKT file
+        new ol.layer.Vector({
+          title: 'WKT',
+          source: new ol.source.Vector({
+            format: new ol.format.WKT(),
+            url: 'data/admin9.csv'
+          }),
+          style: vectorStyle,
+          visible: false
+        }),
+
+      ]
+    });
+    
+    </script>
+  </body>
+</html>
