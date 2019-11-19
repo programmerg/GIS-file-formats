@@ -1,0 +1,12 @@
+{
+  "name":"admin9",
+  "description":"",
+  "version":2,
+  "minzoom":0,
+  "maxzoom":5,
+  "center":"19.1300157,47.4814183,0",
+  "bounds":"18.9251057,47.3496899,19.3349258,47.6131468",
+  "type":"overlay",
+  "format":"pbf",
+  "json":"{\n  \"vector_layers\":[\n    {\n      \"id\":\"admin9\",\n      \"description\":\"\",\n      \"minzoom\":0,\n      \"maxzoom\":5,\n      \"fields\":{\n        \"NAME\":\"String\",\n        \"ADMIN_LEVE\":\"String\"\n      }\n    }\n  ],\n  \"tilestats\":{\n    \"layerCount\":1,\n    \"layers\":[\n      {\n        \"layer\":\"admin9\",\n        \"count\":23,\n        \"geometry\":\"Polygon\",\n        \"attributeCount\":2,\n        \"attributes\":[\n          {\n            \"attribute\":\"NAME\",\n            \"count\":23,\n            \"type\":\"string\",\n            \"values\":[\n              \"I. kerület\",\n              \"II. kerület\",\n              \"III. kerület\",\n              \"IV. kerület\",\n              \"IX. kerület\",\n              \"V. kerület\",\n              \"VI. kerület\",\n              \"VII. kerület\",\n              \"VIII. kerület\",\n              \"X. kerület\",\n              \"XI. kerület\",\n              \"XII. kerület\",\n              \"XIII. kerület\",\n              \"XIV. kerület\",\n              \"XIX. kerület\",\n              \"XV. kerület\",\n              \"XVI. kerület\",\n              \"XVII. kerület\",\n              \"XVIII. kerület\",\n              \"XX. kerület\",\n              \"XXI. kerület\",\n              \"XXII. kerület\",\n              \"XXIII. kerület\"\n            ]\n          },\n          {\n            \"attribute\":\"ADMIN_LEVE\",\n            \"count\":1,\n            \"type\":\"string\",\n            \"values\":[\n              \"9\"\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}"
+}
