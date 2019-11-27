@@ -3,7 +3,7 @@
 <html>
   <head>
     <meta charset="utf-8"/>
-    <title>demo</title>
+    <title>GIS file formats</title>
     <link rel="stylesheet" href="libs/ol.css" type="text/css">
     <link rel="stylesheet" href="libs/ol-layerswitcher.css" type="text/css">
     <link rel="stylesheet" href="libs/highlight.css">
@@ -74,25 +74,56 @@
     };
 
     // client side styling
-    let defaultStyle = new ol.style.Style({
-      fill: new ol.style.Fill({
-        color: [55, 126, 184, 0.24]
+    let strokeCache = {
+      '2': new ol.style.Stroke({ // állam
+        color: [255, 35, 35],
+        width: 2.5
       }),
-      stroke: new ol.style.Stroke({
-        color: [49, 132, 195],
+      '5': new ol.style.Stroke({ // régió
+        color: [255, 35, 35],
+        width: 1.5
+      }),
+      '6': new ol.style.Stroke({ // megye
+        color: [255, 145, 1],
         width: 1
+      }),
+      '7': new ol.style.Stroke({ // járás
+        color: [183, 64, 0],
+        width: 1
+      }),
+      '8': new ol.style.Stroke({ // település
+        color: [225, 198, 76],
+        width: 1
+      }),
+      '9': new ol.style.Stroke({ // kerület
+        color: [35, 35, 35],
+        width: 1
+      })
+    };
+    let defaultStyle = new ol.style.Style({
+      stroke: new ol.style.Stroke({
+        color: [255, 35, 35],
+        width: 1.5
       }),
       text: new ol.style.Text({
         text: '',
         fill: new ol.style.Fill({
-          color: [49, 132, 195]
+          color: [33, 33, 33]
         })
       })
     });
     // its very important for performance to cache styles
     let vectorStyle = (feature, resolution) => {
-      let text = feature.get('NAME');
+      let level = feature.get('level');
+      let text = feature.get('name');
+      if (level == 9 && resolution > 110) return null;
+      if (level == 8 && resolution > 110) return null;
+      if (level == 7 && resolution > 250) return null;
+      if (level == 6 && resolution > 350) return null;
+      if (level == 5 && resolution > 450) return null;
+      //if (level == 2 && resolution > 700) return null;
       defaultStyle.text_.text_ = text;
+      defaultStyle.stroke_ = strokeCache[level];
       return [defaultStyle];
     };
 
@@ -124,10 +155,10 @@
           title: 'GeoJPEG',
           source: new ol.source.ImageStatic({
             imageExtent: [ // need to set manually
-              2106732.7099006748758256, 5999340.3300000000745058, 
-              2152354.5100993253290653, 6042735.8600000003352761
+              1793743.4113663190510124, 5738323.4000000003725290,
+              2549007.5886336811818182, 6204778.9599999999627471
             ],
-            url: 'data/admin9.jpg'
+            url: 'data/boundaries.jpg'
           }),
           visible: false
         }),
@@ -138,7 +169,7 @@
           source: new ol.source.ImageStatic({
             imageLoadFunction: GeoTIFFloader,
             imageExtent: ol.proj.get('EPSG:3857').getExtent(),
-            url: 'data/admin9.tiff'
+            url: 'data/boundaries.tiff'
             // world files (TFW) not supported!
           }),
           visible: false
@@ -150,7 +181,7 @@
           source: new ol.source.Vector({
             format: new ol.format.GeoJSON(),
             loader: SHPloader,
-            url: 'data/admin9.shp'
+            url: 'data/boundaries.shp'
             // parsed with DBF and SHX files
           }),
           style: vectorStyle,
@@ -162,7 +193,28 @@
           title: 'MVT',
           source: new ol.source.VectorTile({
             format: new ol.format.MVT(),
-            url: 'data/admin9.mvt/{z}/{x}/{y}.pbf'
+            tileGrid: ol.tilegrid.createXYZ({ maxZoom: 10 }),
+            url: 'data/boundaries.mvt/{z}/{x}/{y}.pbf',
+            transition: 0,
+            // TMS service
+            //url: 'http://localhost:8080/geoserver/gwc/service/'
+            //   + 'tms/1.0.0/boundaries@EPSG%3A3857@pbf/{z}/{x}/{-y}.pbf',
+
+            // WMTS service
+            //url: 'http://localhost:8080/geoserver/gwc/service/'
+            //   + 'wmts?SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetTile&LAYER=boundaries'
+            //   + '&STYLE=&FORMAT=application%2Fvnd.mapbox-vector-tile'
+            //   + '&TILEMATRIX=EPSG:3857:{z}&TILEMATRIXSET=EPSG:3857&TILECOL={x}&TILEROW={y}',
+            
+            // WMS service
+            //tileUrlFunction: (coordinate, projection) => {
+            //  let size = map.getSize();
+            //  return 'http://localhost:8080/geoserver/gwc/service/'
+            //  + 'wms?service=WMS&version=1.1.0&request=GetMap&layers=boundaries'
+            //  + '&format=application%2Fvnd.mapbox-vector-tile'
+            //  + '&width=' + size[0] + '&height=' + size[0] + '&srs=EPSG%3A3857'
+            //  + '&bbox=' + map.getView().calculateExtent().join(',');
+            //},
           }),
           style: vectorStyle,
           visible: false
@@ -173,7 +225,7 @@
           title: 'GeoJSON',
           source: new ol.source.Vector({
             format: new ol.format.GeoJSON(),
-            url: 'data/admin9.geojson'
+            url: 'data/boundaries.geojson'
           }),
           style: vectorStyle,
           visible: false
@@ -184,7 +236,7 @@
           title: 'KML',
           source: new ol.source.Vector({
             format: new ol.format.KML(),
-            url: 'data/admin9.kml'
+            url: 'data/boundaries.kml'
           }),
           style: vectorStyle,
           // KML has own style defeinition
@@ -196,7 +248,7 @@
           title: 'WKT',
           source: new ol.source.Vector({
             format: new ol.format.WKT(),
-            url: 'data/admin9.wkt'
+            url: 'data/boundaries.wkt'
           }),
           style: vectorStyle,
           visible: false
