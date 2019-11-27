@@ -7,11 +7,22 @@
     <link rel="stylesheet" href="libs/ol.css" type="text/css">
     <link rel="stylesheet" href="libs/ol-layerswitcher.css" type="text/css">
     <link rel="stylesheet" href="libs/highlight.css">
+    <style>
+    #map { position: absolute; top: 0; right: 40%; bottom: 0; left: 0; height: 100%; }
+    pre { position: absolute; top: 0; right: 0; bottom: 0; left: 60%; height: 100%; margin: 0; padding: 0; }
+    #code { height: 100%; margin: 0; padding: 0; }
+    #stylebtn { position: absolute; bottom: 0.5em; left: 0.5em }
+    #stylebtn button { width: auto; padding: 0 0.5em; font-weight: normal; font-size: initial; }
+    #stylebtn button.active { background-color: rgba(0, 0, 0, 0.7); }
+    </style>
   </head>
   <body>
     
-    <div id="map" class="map" style="position: absolute; top: 0; right: 40%; bottom: 0; left: 0; height: 100%;"></div>
-    <pre style="position: absolute; top: 0; right: 0; bottom: 0; left: 60%; height: 100%; margin: 0; padding: 0;"><code id="code" class="javascript" style="height: 100%; margin: 0; padding: 0;"></code></pre>
+    <div id="map" class="map"></div>
+    <pre><code id="code" class="javascript"></code></pre>
+    <div id="stylebtn" class="ol-unselectable ol-control">
+      <button type="button" class="active" onclick="toggleStyle(this)">Toggle optimized styles</button>
+    </div>
 
     <script src="libs/ol.js"></script>
     <script src="libs/ol-layerswitcher.js"></script>
@@ -264,6 +275,14 @@
       code.innerHTML = source.replace(/url: '(data\/.*?)'/g,
         'url: \'<a href="$1" class="hljs-string">$1</a>\'');
       hljs.initHighlightingOnLoad();
+      
+      function toggleStyle(this_) {
+        let active = (this_.className == 'active') ? true : false;
+        this_.className = !active ? 'active' : '';
+        for (let i = 3; i <= 7; i++) {
+          map.getLayers().item(i).setStyle(active ? undefined : vectorStyle);
+        }
+      }
     </script>
   </body>
 </html>
