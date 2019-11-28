@@ -88,11 +88,11 @@
     let strokeCache = {
       '2': new ol.style.Stroke({ // állam
         color: [255, 35, 35],
-        width: 2.5
+        width: 4
       }),
       '5': new ol.style.Stroke({ // régió
         color: [255, 35, 35],
-        width: 1.5
+        width: 2
       }),
       '6': new ol.style.Stroke({ // megye
         color: [255, 145, 1],
@@ -112,6 +112,9 @@
       })
     };
     let defaultStyle = new ol.style.Style({
+      fill: new ol.style.Fill({
+        color: [255, 255, 255, 0.2]
+      }),
       stroke: new ol.style.Stroke({
         color: [255, 35, 35],
         width: 1.5
@@ -205,11 +208,13 @@
           source: new ol.source.VectorTile({
             format: new ol.format.MVT(),
             tileGrid: ol.tilegrid.createXYZ({ maxZoom: 10 }),
+
+            // Filesystem
             url: 'data/boundaries.mvt/{z}/{x}/{y}.pbf',
-            transition: 0,
+            
             // TMS service
             //url: 'http://localhost:8080/geoserver/gwc/service/'
-            //   + 'tms/1.0.0/boundaries@EPSG%3A3857@pbf/{z}/{x}/{-y}.pbf',
+            //   + 'tms/1.0.0/boundaries@EPSG%3A3857@pbf/{z}/{x}/{y}.pbf',
 
             // WMTS service
             //url: 'http://localhost:8080/geoserver/gwc/service/'
@@ -226,6 +231,8 @@
             //  + '&width=' + size[0] + '&height=' + size[0] + '&srs=EPSG%3A3857'
             //  + '&bbox=' + map.getView().calculateExtent().join(',');
             //},
+
+            transition: 0,
           }),
           style: vectorStyle,
           visible: false
